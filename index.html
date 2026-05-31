@@ -6,6 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Notas Rápidas</title>
+  
+  <!-- Icono profesional para la pantalla de inicio del iPhone -->
+  <link rel="apple-touch-icon" href="https://img.icons8.com/sf-black-filled/512/007AFF/notepad.png">
+
   <style>
     :root {
       --bg-color: #f2f2f7;
@@ -37,8 +41,6 @@
       margin: 0 auto;
       padding-bottom: 100px;
     }
-    
-    /* Cabecera compacta en una sola fila */
     header {
       display: flex;
       justify-content: space-between;
@@ -50,8 +52,6 @@
       font-weight: 700;
       margin: 0;
     }
-
-    /* Botón contenedor del menú desplegable de filtrado */
     .filter-wrapper {
       position: relative;
       background-color: var(--card-bg);
@@ -64,7 +64,6 @@
       align-items: center;
       gap: 4px;
     }
-    /* El select real se vuelve invisible pero ocupa todo el botón para que al tocarlo salte en iOS */
     .filter-select-native {
       position: absolute;
       top: 0;
@@ -74,7 +73,6 @@
       opacity: 0;
       cursor: pointer;
     }
-
     .notes-grid {
       display: flex;
       flex-direction: column;
@@ -102,7 +100,6 @@
       line-height: 18px;
     }
     .note-textarea:focus { outline: none; }
-    
     .note-footer {
       display: flex;
       justify-content: space-between;
@@ -153,7 +150,6 @@
   <div class="app-container">
     <header>
       <h1>Notas Rápidas</h1>
-      <!-- Botón de Filtrar optimizado -->
       <div class="filter-wrapper">
         <span id="filter-label">🔍 Filtrar: Todas</span>
         <select id="filter-select" class="filter-select-native">
@@ -253,17 +249,13 @@
       if (firstTxt) firstTxt.focus();
     });
 
-    // Lógica del nuevo menú desplegable de filtrado
     filterSelect.addEventListener('change', (e) => {
       currentFilter = e.target.value;
-      
-      // Actualizamos el texto del botón para saber qué filtro está activo
       if (currentFilter === 'todas') {
         filterLabel.textContent = '🔍 Filtrar: Todas';
       } else {
         filterLabel.textContent = `🔍 ${categories[currentFilter]}`;
       }
-      
       renderNotes();
     });
 
