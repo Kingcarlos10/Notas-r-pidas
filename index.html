@@ -37,36 +37,44 @@
       margin: 0 auto;
       padding-bottom: 100px;
     }
+    
+    /* Cabecera compacta en una sola fila */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 4px 16px 4px;
+    }
     header h1 {
       font-size: 22px;
       font-weight: 700;
-      margin: 8px 0 12px 4px;
+      margin: 0;
     }
-    .filter-bar {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      scrollbar-width: none;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-btn {
+
+    /* Botón contenedor del menú desplegable de filtrado */
+    .filter-wrapper {
+      position: relative;
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
-      color: var(--text-color);
       padding: 6px 12px;
       border-radius: 12px;
-      font-size: 12px;
-      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    /* El select real se vuelve invisible pero ocupa todo el botón para que al tocarlo salte en iOS */
+    .filter-select-native {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
       cursor: pointer;
-      font-family: inherit;
     }
-    .filter-btn.active {
-      background-color: var(--accent-color);
-      color: white;
-      border-color: var(--accent-color);
-    }
+
     .notes-grid {
       display: flex;
       flex-direction: column;
@@ -94,6 +102,7 @@
       line-height: 18px;
     }
     .note-textarea:focus { outline: none; }
+    
     .note-footer {
       display: flex;
       justify-content: space-between;
@@ -144,43 +153,56 @@
   <div class="app-container">
     <header>
       <h1>Notas Rápidas</h1>
-      <div class="filter-bar" id="filter-bar">
-        <button class="filter-btn active" data-category="todas">Todas</button>
-        <button class="filter-btn" data-category="trabajo">💼 Trabajo</button>
-        <button class="filter-btn" data-category="musica">🎵 Música</button>
-        <button class="filter-btn" data-category="series">🎬 Series</button>
-        <button class="filter-btn" data-category="restaurante">🍔 Restaurante</button>
-        <button class="filter-btn" data-category="vino">🍷 Vino</button>
-        <button class="filter-btn" data-category="viaje">✈️ Viaje</button>
-        <button class="filter-btn" data-category="libros">📚 Libros</button>
-        <button class="filter-btn" data-category="internet">🌐 App/Internet</button>
-        <button class="filter-btn" data-category="gestion">✅ Gestión</button>
-        <button class="filter-btn" data-category="personas">👥 Personas</button>
+      <!-- Botón de Filtrar optimizado -->
+      <div class="filter-wrapper">
+        <span id="filter-label">🔍 Filtrar: Todas</span>
+        <select id="filter-select" class="filter-select-native">
+          <option value="todas">🔍 Todas las notas</option>
+          <option value="trabajo">💼 Trabajo</option>
+          <option value="musica">🎵 Música</option>
+          <option value="series">🎬 Series</option>
+          <option value="restaurante">🍔 Restaurante</option>
+          <option value="vino">🍷 Vino</option>
+          <option value="viaje">✈️ Viaje</option>
+          <option value="libros">📚 Libros</option>
+          <option value="internet">🌐 App/Internet</option>
+          <option value="gestion">✅ Gestión</option>
+          <option value="personas">👥 Personas</option>
+        </select>
       </div>
     </header>
+    
     <main><div id="notes-container" class="notes-grid"></div></main>
     <button id="add-note-btn" class="fab">+</button>
   </div>
+
   <script>
     const notesContainer = document.getElementById('notes-container');
     const addNoteBtn = document.getElementById('add-note-btn');
-    const filterBar = document.getElementById('filter-bar');
+    const filterSelect = document.getElementById('filter-select');
+    const filterLabel = document.getElementById('filter-label');
+    
     let notes = JSON.parse(localStorage.getItem('rapidas-notes')) || [];
     let currentFilter = 'todas';
+
     const categories = {
       trabajo: "💼 Trabajo", musica: "🎵 Música", series: "🎬 Series",
       restaurante: "🍔 Restaurante", vino: "🍷 Vino", viaje: "✈️ Viaje",
       libros: "📚 Libros", internet: "🌐 App/Internet", gestion: "✅ Gestión",
       personas: "👥 Personas"
     };
+
     function saveNotes() { localStorage.setItem('rapidas-notes', JSON.stringify(notes)); }
+    
     function autoResizeTextarea(textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = textarea.scrollHeight + 'px';
     }
+
     function renderNotes() {
       notesContainer.innerHTML = '';
       const filteredNotes = currentFilter === 'todas' ? notes : notes.filter(n => n.category === currentFilter);
+      
       filteredNotes.forEach((note) => {
         const card = document.createElement('div');
         card.className = 'note-card';
@@ -198,17 +220,21 @@
         const textarea = card.querySelector('.note-textarea');
         const select = card.querySelector('.category-select');
         const deleteBtn = card.querySelector('.delete-btn');
+        
         if (note.text) { setTimeout(() => autoResizeTextarea(textarea), 0); }
+        
         textarea.addEventListener('input', (e) => {
           note.text = e.target.value;
           saveNotes();
           autoResizeTextarea(e.target);
         });
+        
         select.addEventListener('change', (e) => {
           note.category = e.target.value;
           saveNotes();
           if (currentFilter !== 'todas') renderNotes();
         });
+        
         deleteBtn.addEventListener('click', () => {
           notes = notes.filter(n => n.id !== note.id);
           saveNotes();
@@ -217,6 +243,7 @@
         notesContainer.appendChild(card);
       });
     }
+
     addNoteBtn.addEventListener('click', () => {
       const defaultCat = currentFilter === 'todas' ? 'trabajo' : currentFilter;
       notes.unshift({ id: Date.now(), text: '', category: defaultCat });
@@ -225,14 +252,21 @@
       const firstTxt = notesContainer.querySelector('.note-textarea');
       if (firstTxt) firstTxt.focus();
     });
-    filterBar.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.getAttribute('data-category');
-        renderNotes();
-      });
+
+    // Lógica del nuevo menú desplegable de filtrado
+    filterSelect.addEventListener('change', (e) => {
+      currentFilter = e.target.value;
+      
+      // Actualizamos el texto del botón para saber qué filtro está activo
+      if (currentFilter === 'todas') {
+        filterLabel.textContent = '🔍 Filtrar: Todas';
+      } else {
+        filterLabel.textContent = `🔍 ${categories[currentFilter]}`;
+      }
+      
+      renderNotes();
     });
+
     renderNotes();
   </script>
 </body>
